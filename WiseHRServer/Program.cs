@@ -4,15 +4,15 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Supabase;
 using System.Text;
-using WiseHRServer.Services; // Assuming this namespace contains MongoDbService and EncryptionService
-using CalendarApi.Data; // Assuming this namespace contains CalendarDbContext
+using WiseHRServer.Services; 
+using CalendarApi.Data; 
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add controllers
+
 builder.Services.AddControllers();
 
-// ✅ CORS: Allow specific frontend origin (more secure than AllowAll)
+// CORS: Allow specific frontend origin (more secure than AllowAll)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
@@ -24,16 +24,16 @@ builder.Services.AddCors(options =>
     });
 });
 
-// ✅ SQL Server connection (from second snippet)
+// SQL Server connection 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
     ?? throw new Exception("SQL Server connection string 'DefaultConnection' is missing");
 builder.Services.AddDbContext<CalendarDbContext>(options =>
     options.UseSqlServer(connectionString));
 
-// ✅ MongoDB (from first snippet)
+//  MongoDB 
 builder.Services.AddSingleton<MongoDbService>();
 
-// ✅ Encryption (from first snippet)
+//  Encryption
 builder.Services.AddSingleton<EncryptionService>(provider =>
 {
     var key = builder.Configuration["Encryption:Aes256Key"] 
@@ -41,7 +41,7 @@ builder.Services.AddSingleton<EncryptionService>(provider =>
     return new EncryptionService(key);
 });
 
-// ✅ JWT Authentication using Supabase JWT secret (from first snippet)
+//  JWT Authentication using Supabase JWT secret 
 var jwtSecret = builder.Configuration["Supabase:JwtSecret"] 
     ?? throw new Exception("JWT Secret is missing or too short in appsettings.json");
 if (jwtSecret.Length < 16)
@@ -84,7 +84,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 builder.Services.AddHttpClient();
 
-// ✅ Supabase client (from first snippet)
+//  Supabase client 
 var supabaseUrl = builder.Configuration["Supabase:Url"] 
     ?? throw new Exception("Supabase URL is missing in appsettings.json");
 var serviceRoleKey = builder.Configuration["Supabase:ServiceRoleKey"] 
@@ -95,7 +95,7 @@ builder.Services.AddScoped(_ => new Supabase.Client(
     serviceRoleKey,
     new SupabaseOptions { AutoConnectRealtime = true }));
 
-// ✅ Swagger (merged from both snippets)
+//  Swagger 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -134,7 +134,7 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// ✅ Middleware order
+//  Middleware order
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
@@ -149,13 +149,12 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();
 
-// 🧠 CORS must be placed before authentication
 app.UseCors("AllowFrontend");
 
 app.UseAuthentication();
 app.UseAuthorization();
 
-// ✅ Map controllers
+
 app.MapControllers();
 
 app.Run();
