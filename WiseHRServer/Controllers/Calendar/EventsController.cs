@@ -9,6 +9,7 @@ namespace CalendarApi.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [Tags("Calendar Events")]
     public class EventsController : ControllerBase
     {
         private readonly CalendarDbContext _context;
